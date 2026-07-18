@@ -101,7 +101,7 @@ merged process to risk wedging the panels on this hardware.
 ## Install
 
 ```bash
-git clone <this repo> ~/jonsbo-tf3-linux-driver
+git clone https://github.com/purplebrain23/jonsbo-tf3-linux-driver.git ~/jonsbo-tf3-linux-driver
 cd ~/jonsbo-tf3-linux-driver
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
