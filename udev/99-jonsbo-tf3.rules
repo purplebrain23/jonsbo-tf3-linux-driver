@@ -1,0 +1,6 @@
+# Jonsbo TF3-360SCB fan panels - allow non-root USB access.
+SUBSYSTEM=="usb", ATTRS{idVendor}=="43a8", ATTRS{idProduct}=="0e61", MODE="0666"
+
+# Optional: pump display (640x480, driven separately via
+# turing-smart-screen-cli, not by this repo) - uncomment if you use it.
+#SUBSYSTEM=="usb", ATTRS{idVendor}=="1cbe", ATTRS{idProduct}=="0035", MODE="0666"
