@@ -154,10 +154,33 @@ Edit `render_fan_a`/`render_fan_b`/`render_fan_c` and `render_pump_idle` in
 
 ### Optional: pump display
 
-Install [turing-smart-screen-cli](https://github.com/mathoudebine/turing-smart-screen-python)
-separately and make sure its `turing-screen` binary is on `PATH` (or set
-`TURING_SCREEN_CLI` to its full path). If it's not found, `jonsbo_monitor.py`
-skips the pump-display step and only drives the 3 fan panels.
+The pump's 640×480 display (`1cbe:0035`) is a *different* USB device from
+the 3 fan panels and isn't reverse-engineered in this repo — it's driven
+through a separate third-party tool,
+[turingscreencli](https://pypi.org/project/turingscreencli/) ("Turing Smart
+Screen CLI" by Study Hsueh).
+
+**The one non-obvious step:** that tool's PyPI release only targets the
+*Turing Smart Screen 8.8" V1.1* (`idProduct=0x0088`) — a different, larger
+display from the same OEM. It doesn't recognize our 3.5" `0x0035` device out
+of the box. It works anyway once you clone the tool from source and change
+one line:
+
+```
+src/turingscreencli/transport.py:
+    PRODUCT_ID = 0x0088   # -> change to 0x0035
+```
+
+After that, `pip install -e .` gives you the `turing-screen` console script
+used by `jonsbo_monitor.py` (`send-image --path ...`). Both devices are
+apparently protocol-compatible enough at the level this tool operates on
+that only the product ID needed to change — nothing else.
+
+Install it, patch that line, make sure the resulting `turing-screen` binary
+is on `PATH` (or set `TURING_SCREEN_CLI` to its full path), and add a udev
+rule for `1cbe:0035` (see the commented-out line in `udev/99-jonsbo-tf3.rules`).
+If `turing-screen` isn't found, `jonsbo_monitor.py` skips the pump-display
+step and only drives the 3 fan panels.
 
 ### Optional: MangoHud FPS overlay on the pump display
 
