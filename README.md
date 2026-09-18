@@ -189,6 +189,26 @@ Configure MangoHud to log CSVs to a folder (`output_folder=...`,
 folder (defaults to `~/mangologs`). While a log file is fresh (<8s old),
 the pump display shows FPS/frametime/power instead of the idle clock.
 
+MangoHud still has to actually be *active* in the game for anything to be
+logged. Enabling it per-game (Steam launch options `mangohud %command%`) is
+the usual advice, but it's easy to forget on a newly installed game — and
+the symptom is indistinguishable from a broken display: the pump just stays
+on the idle screen. Enabling it globally instead is more robust for this
+use case:
+
+```sh
+echo 'MANGOHUD=1' > ~/.config/environment.d/mangohud.conf   # then re-login
+```
+
+The implicit Vulkan layer (`/usr/share/vulkan/implicit_layer.d/MangoHud.*.json`)
+is picked up from that variable alone, so the `mangohud` wrapper script is
+not needed for Vulkan titles. OpenGL titles still need the wrapper.
+
+Caveat: globally, *every* Vulkan application logs, not just games.
+`get_mango_metrics()` always picks the newest CSV in the folder, so a
+non-game that writes one would be shown on the pump display. Add those to
+MangoHud's `blacklist` if it becomes a problem.
+
 ## Credits
 
 Protocol reverse-engineered via USB capture analysis (Wireshark/USBPcap)
