@@ -209,6 +209,44 @@ Caveat: globally, *every* Vulkan application logs, not just games.
 non-game that writes one would be shown on the pump display. Add those to
 MangoHud's `blacklist` if it becomes a problem.
 
+## Troubleshooting
+
+### Fan panels only show the Jonsbo "J" logo
+
+That's the panels' built-in firmware screen: nothing is driving them. Check
+why the services died:
+
+```bash
+systemctl --user status jonsbo-fan-daemon jonsbo-monitor
+journalctl --user -u jonsbo-fan-daemon -u jonsbo-monitor -b
+```
+
+The most common cause is a distro update that bumped the system Python's
+minor version (e.g. 3.14 → 3.15). A venv's `bin/python3` is only a symlink
+to the system interpreter, but its packages live under
+`.venv/lib/python3.<old>/site-packages`, so the new interpreter can't see
+them and both services exit right away with
+`ModuleNotFoundError: No module named 'PIL'` / `'psutil'`. This is easy to
+miss because the units use `Restart=no`.
+
+Fix: rebuild the venv against the new interpreter and restart.
+
+```bash
+mv .venv .venv-old            # keep until everything works again
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+systemctl --user restart jonsbo-fan-daemon jonsbo-monitor
+```
+
+If you use the pump display, also rebuild the venv that `turing-screen`
+lives in, and repeat `pip install -e .` from your patched turingscreencli
+checkout. Because it's an editable install, the `PRODUCT_ID` patch in
+`src/` is kept.
+
+Right after the restart, `jonsbo-monitor` may log one
+`Fan daemon unreachable: timed out` while the daemon is still
+claiming the panels. That's harmless if it doesn't repeat.
+
 ## Credits
 
 Protocol reverse-engineered via USB capture analysis (Wireshark/USBPcap)
